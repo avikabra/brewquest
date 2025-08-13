@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { checkLimit } from '@/lib/rateLimit';
 
 const Body = z.object({
   description: z.string().min(3),
@@ -46,8 +47,11 @@ export async function POST(req: NextRequest) {
     if (authErr || !authUser?.user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     const userId = authUser.user.id;
 
-    if (!rateLimit(userId)) {
-      return NextResponse.json({ error: 'Rate limit exceeded (30/hour). Try later.' }, { status: 429 });
+    const limit = await checkLimit(`ai:${userId}`);
+    if (!limit.success) {
+        const retry = limit.reset; // ms timestamp
+        return NextResponse.json({ error: 'Rate limit exceeded (30/hour). Try later.' }, { status: 429, headers: {
+            'Retry-After': Math.ceil((retry - Date.now())/1000).toString() }});
     }
 
     const { description, context, beerMeta } = Body.parse(await req.json());
