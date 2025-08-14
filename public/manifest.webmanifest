@@ -1,6 +1,6 @@
 {
-  "name": "BeerQuest",
-  "short_name": "BeerQuest",
+  "name": "BrewQuest",
+  "short_name": "BrewQuest",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b132a",
