@@ -11,7 +11,7 @@ type Bar = { id: string; name: string; address?: string | null; lat: number; lng
 
 export default function MapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map>();
+  const map = useRef<mapboxgl.Map | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number }>();
   const [selected, setSelected] = useState<string | null>(null);
   const [open, setOpen] = useState(false);

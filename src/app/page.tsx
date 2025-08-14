@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,15 +11,19 @@ type Stats = { total: number; uniqueBars: number; uniqueBeers: number; byDay: { 
 type TopBar = { bar_id: string; name: string; address?: string | null; count: number; avg: number };
 
 export default function Home() {
-  const supabase = supabaseBrowser();
   const [stats, setStats] = useState<Stats | null>(null);
   const [topBars, setTopBars] = useState<TopBar[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
+      const supabase = supabaseBrowser();
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      if (!token) return;
+      if (!token) {
+        router.replace('/sign-in');
+        return;
+      }
       const [s, t] = await Promise.all([
         fetch('/api/me/stats', { headers: { Authorization: `Bearer ${token}` } }).then(r=>r.ok?r.json():null),
         fetch('/api/me/top-bars', { headers: { Authorization: `Bearer ${token}` } }).then(r=>r.ok?r.json():{ top:[] })
@@ -26,7 +31,7 @@ export default function Home() {
       if (s) setStats(s);
       setTopBars(t.top ?? []);
     })();
-  }, [supabase]);
+  }, []);
 
   const Spark = ({ points }: { points: number[] }) => {
     const w = 160, h = 40, pad = 6;

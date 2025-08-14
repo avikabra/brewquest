@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const admin = supabaseAdmin();
   const { data, error } = await admin
     .from('checkins')
@@ -22,8 +22,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ checkin: data });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id || !/^[0-9a-fA-F-]{36}$/.test(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }

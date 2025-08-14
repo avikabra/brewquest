@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
   const authz = req.headers.get('authorization') || '';
   const token = authz.startsWith('Bearer ') ? authz.slice('Bearer '.length) : null;
 
@@ -14,7 +18,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     userId = authUser?.user?.id ?? null;
   }
 
-  // My check-ins at this bar
   let my_checkins: any[] = [];
   let my_top: any[] = [];
   let my_last_visit: string | null = null;
@@ -28,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       .order('created_at', { ascending: false })
       .limit(50);
     my_checkins = data ?? [];
-    my_top = [...my_checkins].sort((a,b)=> (b.overall ?? 0) - (a.overall ?? 0)).slice(0, 3);
+    my_top = [...my_checkins].sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0)).slice(0, 3);
     my_last_visit = my_checkins?.[0]?.created_at ?? null;
   }
 

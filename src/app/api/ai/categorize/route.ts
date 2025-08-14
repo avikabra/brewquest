@@ -21,21 +21,6 @@ const categories = [
 
 type Ratings = Record<typeof categories[number], number>;
 
-const limiter = new Map<string, { count: number; resetAt: number }>();
-const MAX_HOURLY = 30;
-
-function rateLimit(key: string) {
-  const now = Date.now();
-  const slot = limiter.get(key);
-  if (!slot || now > slot.resetAt) {
-    limiter.set(key, { count: 1, resetAt: now + 60 * 60 * 1000 });
-    return true;
-  }
-  if (slot.count >= MAX_HOURLY) return false;
-  slot.count += 1;
-  return true;
-}
-
 export async function POST(req: NextRequest) {
   try {
     const authz = req.headers.get('authorization') || '';
@@ -198,7 +183,3 @@ async function callOpenAI(args: {
 function avg(keys: string[], r: Ratings) { return Math.round(keys.reduce((s,k)=>s+(r as any)[k],0)/keys.length); }
 function clamp(n:number,min:number,max:number){ return Math.max(min, Math.min(max, n)); }
 function word(n:number){ return n>=8?'high':n>=5?'moderate':'low'; }
-
-async function safeJson(r: Response) {
-  try { return await r.json(); } catch { return {}; }
-}

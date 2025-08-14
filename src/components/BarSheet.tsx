@@ -15,10 +15,13 @@ export default function BarSheet({ barId, open, onOpenChange }: { barId: string 
   const [bar, setBar] = useState<Bar | null>(null);
   const [agg, setAgg] = useState<Agg | null>(null);
   const [details, setDetails] = useState<any>({});
-  const supabase = supabaseBrowser();
+  const [supabase, setSupabase] = useState<ReturnType<typeof supabaseBrowser> | null>(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined') setSupabase(supabaseBrowser());
+  }, []);
 
   useEffect(() => {
-    if (!open || !barId) return;
+    if (!open || !barId || !supabase) return;
     (async () => {
       const base = await fetch(`/api/bars/${barId}`).then(r=>r.json());
       setBar(base.bar ?? null); setAgg(base.aggregates ?? null);

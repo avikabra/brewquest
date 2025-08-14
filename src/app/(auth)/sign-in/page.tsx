@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -11,10 +11,10 @@ import { Button } from '@/components/ui/button';
 export default function SignInPage() {
   const sp = useSearchParams();
   const redirected = sp.get('confirmed') === '1';
+  const nextPath = sp.get('next') || '/';
   const [tab, setTab] = useState<'signin'|'signup'>('signin');
 
   const router = useRouter();
-  const supa = supabaseBrowser();
 
   // === Sign in form state ===
   const [siEmail, setSiEmail] = useState('');
@@ -33,16 +33,18 @@ export default function SignInPage() {
   // Optional: if already logged in, bounce home
   useEffect(() => {
     (async () => {
+      const supa = supabaseBrowser();
       const { data: { session } } = await supa.auth.getSession();
       if (session) router.replace('/');
     })();
-  }, [router, supa]);
+  }, [router]);
 
   // === handlers ===
   const onSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setSiErr(null); setSiBusy(true);
-    const { data, error } = await supa.auth.signInWithPassword({ email: siEmail, password: siPassword });
+    const supa = supabaseBrowser();
+    const { error } = await supa.auth.signInWithPassword({ email: siEmail, password: siPassword });
     setSiBusy(false);
     if (error) {
       // Helpful errors
@@ -54,7 +56,7 @@ export default function SignInPage() {
       return;
     }
     // success: cookies set, middleware can see them
-    router.replace('/');
+  router.replace(nextPath);
   };
 
   const onSignUp = async (e: React.FormEvent) => {
@@ -72,6 +74,7 @@ export default function SignInPage() {
 
         // Helper to finish by signing in
         const finishBySignin = async () => {
+        const supa = supabaseBrowser();
         const { error } = await supa.auth.signInWithPassword({ email: suEmail.trim(), password: suPassword });
         if (error) {
             setSuErr(`Signed up, but sign-in failed: ${error.message}`);
@@ -79,7 +82,7 @@ export default function SignInPage() {
             setSiEmail(suEmail.trim());
             return;
         }
-        router.replace('/');
+  router.replace(nextPath);
         };
 
         if (res.ok || res.status === 207) {
@@ -90,8 +93,9 @@ export default function SignInPage() {
 
         if (res.status === 409) {
         // Account exists. Try to sign in with the provided password automatically.
+        const supa = supabaseBrowser();
         const { error } = await supa.auth.signInWithPassword({ email: suEmail.trim(), password: suPassword });
-        if (!error) { router.replace('/'); return; }
+  if (!error) { router.replace(nextPath); return; }
         // Wrong password
         setTab('signin');
         setSiEmail(suEmail.trim());
@@ -117,10 +121,12 @@ export default function SignInPage() {
   }, [redirected, suMsg, siErr]);
 
   return (
-    <div className="p-4">
+    <Suspense fallback={null}>
+  <div className="p-4">
+  <style>{`header.sticky{display:none !important}`}</style>
       <Card className="rounded-2xl">
         <CardContent className="p-6 space-y-4">
-          <h1 className="text-xl font-semibold">Welcome to BeerBuddy</h1>
+          <h1 className="text-xl font-semibold">Welcome to Brew Quest</h1>
           {banner && <p className="text-sm text-emerald-600">{banner}</p>}
 
           <Tabs value={tab} onValueChange={(v)=>setTab(v as any)} className="w-full">
@@ -153,5 +159,6 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
+   </Suspense>
   );
 }

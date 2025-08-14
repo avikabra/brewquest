@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
@@ -19,7 +18,10 @@ export default function CheckinPage() {
   const sp = useSearchParams();
   const barId = sp.get('barId') ?? '';
   const router = useRouter();
-  const supabase = supabaseBrowser();
+  const [supabase, setSupabase] = useState<ReturnType<typeof supabaseBrowser> | null>(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined') setSupabase(supabaseBrowser());
+  }, []);
 
   const [beerName, setBeerName] = useState('');
   const [description, setDescription] = useState('');
@@ -41,6 +43,7 @@ export default function CheckinPage() {
 
   const generateAI = async () => {
     setAiLoading(true);
+    if (!supabase) { setAiLoading(false); return alert('Please wait…'); }
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) { setAiLoading(false); return alert('Not signed in'); }
@@ -68,6 +71,7 @@ export default function CheckinPage() {
 
   const save = async () => {
     setSaving(true);
+    if (!supabase) { setSaving(false); return alert('Please wait…'); }
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) { setSaving(false); return alert('Not signed in'); }

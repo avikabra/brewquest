@@ -1,18 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PWARegister from '@/components/PWARegister';
 import NavBar from '@/components/NavBar';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'BrewQuest',
@@ -34,9 +23,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="text-sm opacity-75">v0</nav>
             </div>
           </header>
-          <main className="rounded-2xl bg-white shadow-sm border border-stone-200 p-4">{children}</main>
+          <main className="rounded-2xl bg-white shadow-sm border border-stone-200 p-4">
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
+          </main>
         </div>
-        <NavBar />
+        <Suspense fallback={null}>
+          <NavBar />
+        </Suspense>
         <PWARegister />
       </body>
     </html>

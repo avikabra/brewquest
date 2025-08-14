@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 type Row = {
   id: string;
@@ -18,21 +19,24 @@ type Row = {
 export default function MePage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
-  const supabase = supabaseBrowser();
+  const [signingOut, setSigningOut] = useState(false);
+  const router = useRouter();
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    const supabase = supabaseBrowser();
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) return setRows([]);
     const res = await fetch('/api/me/checkins', { headers: { Authorization: `Bearer ${token}` }});
     const j = await res.json();
     setRows(j.rows ?? []);
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const del = async (id: string) => {
     setLoading(true);
+    const supabase = supabaseBrowser();
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) return;
@@ -45,9 +49,27 @@ export default function MePage() {
     }
   };
 
+  const signOut = async () => {
+    setSigningOut(true);
+    try {
+      const supabase = supabaseBrowser();
+  await supabase.auth.signOut();
+    } catch (e) {
+      // ignore
+    } finally {
+      setSigningOut(false);
+      router.replace('/sign-in');
+    }
+  };
+
   return (
     <div className="space-y-3">
-      <h1 className="text-xl font-semibold">My Check-ins</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">My Check-ins</h1>
+        <Button variant="outline" size="sm" onClick={signOut} disabled={signingOut} className="rounded-xl">
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </Button>
+      </div>
       {rows.map(r => (
         <Card key={r.id} className="rounded-2xl">
           <CardContent className="p-4 space-y-1">

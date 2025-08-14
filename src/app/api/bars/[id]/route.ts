@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const admin = supabaseAdmin();
   const { data: bar, error } = await admin.from('bars')
     .select('id, name, address, lat, lng').eq('id', id).single();

@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Home, Map, User2 } from 'lucide-react';
 
 const tabs = [
@@ -11,6 +13,26 @@ const tabs = [
 
 export default function NavBar() {
   const pathname = usePathname();
+  const [authed, setAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supa = supabaseBrowser();
+    let mounted = true;
+    // Initial session fetch
+    supa.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) setAuthed(!!session);
+    }).catch(()=>mounted && setAuthed(false));
+
+    // Subscribe to auth changes for dynamic nav visibility
+    const { data: { subscription } } = supa.auth.onAuthStateChange((_event, session) => {
+      setAuthed(!!session);
+    });
+    return () => { mounted = false; subscription.unsubscribe(); };
+  }, []);
+
+  // Hide on auth-related pages or while auth state unknown
+  if (pathname?.startsWith('/sign-in') || authed === false || authed === null) return null;
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-screen-sm px-4 pb-safe">
       <div className="mb-3 rounded-2xl bg-white shadow-md border border-stone-200">
