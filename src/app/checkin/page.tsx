@@ -36,6 +36,9 @@ export default function CheckinPage() {
   const [aiReview, setAiReview] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedPaths, setUploadedPaths] = useState<string[]>([]);
 
   useEffect(() => {
     if (!barId) alert('Missing barId in URL. Example: /checkin?barId=<uuid>');
@@ -76,6 +79,22 @@ export default function CheckinPage() {
     const token = session?.access_token;
     if (!token) { setSaving(false); return alert('Not signed in'); }
 
+    // Upload images first
+    let paths = uploadedPaths;
+    if (images.length && !paths.length) {
+      setUploading(true);
+      const ups: string[] = [];
+      for (const f of images.slice(0,6)) {
+        const name = `${session!.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}_${f.name.replace(/[^a-zA-Z0-9.\-_]/g,'_')}`;
+        const { error: upErr } = await supabase.storage.from('checkin-images').upload(name, f, { upsert: false });
+        if (upErr) { console.warn('upload failed', upErr.message); continue; }
+        ups.push(name);
+      }
+      setUploadedPaths(ups);
+      paths = ups;
+      setUploading(false);
+    }
+
     const payload = {
       bar_id: barId,
       beer_name: beerName || undefined,
@@ -91,6 +110,7 @@ export default function CheckinPage() {
       ai_review: aiReview || undefined,
       ai_model: 'gpt-5'
     };
+  if (paths.length) (payload as any).image_paths = paths;
 
     const res = await fetch('/api/checkins', {
       method: 'POST',
@@ -129,6 +149,14 @@ export default function CheckinPage() {
         <CardContent className="p-4 space-y-3">
           <Input placeholder="Beer name" value={beerName} onChange={(e)=>setBeerName(e.target.value)} />
           <Textarea placeholder="Describe taste, aroma, ambiance..." value={description} onChange={(e)=>setDescription(e.target.value)} />
+          <div>
+            <div className="text-xs mb-1">Photos (max 6)</div>
+            <Input type="file" multiple accept="image/*" onChange={e=> setImages(Array.from(e.target.files||[]).slice(0,6))} />
+            {images.length > 0 && <div className="mt-2 grid grid-cols-3 gap-2">
+              {images.map((img,i)=> <div key={i} className="text-[10px] truncate border p-1 rounded-lg bg-stone-50">{img.name}</div> )}
+            </div>}
+            {uploadedPaths.length > 0 && <div className="mt-2 text-xs text-emerald-600">{uploadedPaths.length} uploaded.</div>}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
                 <div className="text-xs mb-1">Day of week</div>
@@ -198,7 +226,7 @@ export default function CheckinPage() {
             <Button onClick={generateAI} className="rounded-xl" type="button" disabled={aiLoading}>
               {aiLoading ? 'Generating…' : 'Generate AI ratings'}
             </Button>
-            <Button onClick={save} variant="secondary" className="rounded-xl" disabled={saving}>Save</Button>
+            <Button onClick={save} variant="secondary" className="rounded-xl" disabled={saving || uploading}>{saving ? 'Saving…' : uploading ? 'Uploading…' : 'Save'}</Button>
           </div>
         </CardContent>
       </Card>

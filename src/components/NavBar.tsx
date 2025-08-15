@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
-import { Home, Map, User2 } from 'lucide-react';
+import { Home, Map, User2, Users, Globe } from 'lucide-react';
 
 const tabs = [
   { href: '/', label: 'Home', Icon: Home },
+  { href: '/community', label: 'Community', Icon: Globe },
+  { href: '/friends', label: 'Friends', Icon: Users },
   { href: '/map', label: 'Map', Icon: Map },
   { href: '/me', label: 'Me', Icon: User2 },
 ];
@@ -36,7 +38,7 @@ export default function NavBar() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-screen-sm px-4 pb-safe">
       <div className="mb-3 rounded-2xl bg-white shadow-md border border-stone-200">
-        <ul className="grid grid-cols-3">
+  <ul className="grid grid-cols-5">
           {tabs.map(({ href, label, Icon }) => {
             const active = pathname === href || (href !== '/' && pathname.startsWith(href));
             return (

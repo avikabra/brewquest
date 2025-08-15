@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await admin
     .from('checkins')
-    .select('id, beer_name, ai_review, overall, created_at, bar_id, bars(name, address)')
+  .select('id, beer_name, ai_review, overall, created_at, bar_id, image_paths, bars(name, address)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(50);
