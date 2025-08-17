@@ -5,14 +5,18 @@ import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Map, Plus, BarChart3, Star } from 'lucide-react';
+import { Map, Plus, BarChart3, Star, Users } from 'lucide-react';
 
 type Stats = { total: number; uniqueBars: number; uniqueBeers: number; byDay: { d: string | Date; c: number }[]; recent: any[] };
 type TopBar = { bar_id: string; name: string; address?: string | null; count: number; avg: number };
 
+interface FriendActivityItem { checkin: any; bar: any; user: any; likes_count: number; liked_by_me: boolean }
+
 export default function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [topBars, setTopBars] = useState<TopBar[]>([]);
+  const [friendActivity, setFriendActivity] = useState<FriendActivityItem[]>([]);
+  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +34,13 @@ export default function Home() {
       ]);
       if (s) setStats(s);
       setTopBars(t.top ?? []);
+      setToken(token);
+      // Load small friend widget
+      if (token) {
+        fetch('/api/friends/activity?limit=5', { headers: { Authorization: `Bearer ${token}` } })
+          .then(r=>r.ok?r.json():{ items: [] })
+          .then(j=> setFriendActivity(j.items || []));
+      }
     })();
   }, []);
 
@@ -107,6 +118,23 @@ export default function Home() {
               ))}
             </ul>
           ) : <div className="text-sm text-stone-600">No recent activity yet.</div>}
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-2xl">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2"><div className="font-medium flex items-center gap-2"><Users size={16}/>Friends are drinking</div><a href="/friends" className="text-xs text-sky-600">View all</a></div>
+          {friendActivity.length ? (
+            <ul className="space-y-2">
+              {friendActivity.map(a => (
+                <li key={a.checkin.id} className="border rounded-xl p-3 bg-stone-50">
+                  <div className="text-xs text-stone-500">{new Date(a.checkin.created_at).toLocaleString()}</div>
+                  <div className="text-sm"><span className="font-medium">{a.user.username || 'Friend'}</span> @ {a.bar.name}</div>
+                  <div className="text-xs">{a.checkin.beer_name || 'Drink'} · Overall {a.checkin.overall ?? '—'} · {a.likes_count} likes</div>
+                </li>
+              ))}
+            </ul>
+          ) : <div className="text-sm text-stone-600">No friend activity yet.</div>}
         </CardContent>
       </Card>
     </div>

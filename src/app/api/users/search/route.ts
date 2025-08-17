@@ -11,14 +11,19 @@ export async function GET(req: NextRequest) {
   if (authErr || !authUser?.user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   const userId = authUser.user.id;
 
-  const { data, error } = await admin
-    .from('checkins')
-  .select('id, beer_name, ai_review, overall, created_at, bar_id, image_paths, bars(name, address)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(50);
+  const url = new URL(req.url);
+  const q = url.searchParams.get('q')?.trim();
+  if (!q || q.length < 2) return NextResponse.json({ users: [] });
+
+  // Search profiles by username with ilike pattern
+  const { data: profiles, error } = await admin
+    .from('profiles')
+    .select('user_id, username')
+    .ilike('username', `%${q}%`)
+    .neq('user_id', userId) // exclude self
+    .limit(20);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  return NextResponse.json({ rows: data ?? [] });
+  return NextResponse.json({ users: profiles || [] });
 }

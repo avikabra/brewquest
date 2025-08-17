@@ -14,6 +14,7 @@ type Row = {
   created_at: string;
   bar_id: string;
   bars?: { name?: string | null; address?: string | null };
+  image_paths?: string[] | null;
 };
 
 export default function MePage() {
@@ -77,6 +78,18 @@ export default function MePage() {
             <div className="font-medium">{r.beer_name ?? 'Untitled beer'}</div>
             <div className="text-sm text-stone-600">Bar: {r.bars?.name ?? 'Unknown'} {r.bars?.address ? `• ${r.bars.address}` : ''}</div>
             <div className="text-sm">Overall: {r.overall ?? '—'}</div>
+            {r.image_paths && r.image_paths.length > 0 && (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {r.image_paths.slice(0,6).map(p => (
+                  <img 
+                    key={p} 
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/checkin-images/${p}`} 
+                    alt="checkin photo" 
+                    className="h-24 w-full object-cover rounded-xl border" 
+                  />
+                ))}
+              </div>
+            )}
             {r.ai_review && <div className="text-sm text-stone-600">{r.ai_review}</div>}
             <div className="pt-2 flex gap-2">
               <Link href={`/checkins/${r.id}`} className="grow">

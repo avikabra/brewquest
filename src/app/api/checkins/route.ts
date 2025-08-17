@@ -7,6 +7,7 @@ const Body = z.object({
   beer_id: z.string().uuid().optional(),
   beer_name: z.string().optional(),
   description: z.string().optional(),
+  image_paths: z.array(z.string()).max(6).optional(),
   ratings: z.object({
     taste: z.number().int().min(0).max(10),
     bitterness: z.number().int().min(0).max(10),
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       group_size: input.context.group_size,
       company_type: input.context.company_type,
       beers_already: input.context.beers_already
-    }).select('id').single();
+  , image_paths: input.image_paths ?? [] }).select('id').single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     try {
