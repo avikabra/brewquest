@@ -50,10 +50,9 @@ export default function FriendsPage() {
 
   const doSearch = async (q: string) => {
     if (!token) return; setLoading(l=>({...l, search:true}));
-    // simple search on profiles table by ilike username (serves as name)
-    const supa = supabaseBrowser();
-    const { data } = await supa.from('profiles').select('user_id, username').ilike('username', `%${q}%`).limit(20);
-    setResults(data||[]); setLoading(l=>({...l, search:false}));
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, { headers: { Authorization: `Bearer ${token}` } });
+    const j = await res.json().catch(()=>({ users: [] }));
+    setResults(j.users||[]); setLoading(l=>({...l, search:false}));
   };
 
   const sendRequest = async (to: string) => {

@@ -81,7 +81,12 @@ export default function MePage() {
             {r.image_paths && r.image_paths.length > 0 && (
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {r.image_paths.slice(0,6).map(p => (
-                  <img key={p} src={`/storage/v1/object/public/checkin-images/${p}`} alt="photo" className="h-24 w-full object-cover rounded-xl border" />
+                  <img 
+                    key={p} 
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/checkin-images/${p}`} 
+                    alt="checkin photo" 
+                    className="h-24 w-full object-cover rounded-xl border" 
+                  />
                 ))}
               </div>
             )}

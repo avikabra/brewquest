@@ -39,6 +39,24 @@ export default function CheckinPage() {
   const [images, setImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadedPaths, setUploadedPaths] = useState<string[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+
+  // Create preview URLs when images change
+  useEffect(() => {
+    const urls = images.map(file => URL.createObjectURL(file));
+    setImagePreviewUrls(urls);
+    return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, [images]);
+
+  const removeImage = (index: number) => {
+    setImages(imgs => imgs.filter((_, i) => i !== index));
+  };
+
+  const addImages = (newFiles: FileList | null) => {
+    if (!newFiles) return;
+    const validFiles = Array.from(newFiles).filter(f => f.type.startsWith('image/'));
+    setImages(imgs => [...imgs, ...validFiles].slice(0, 6)); // max 6
+  };
 
   useEffect(() => {
     if (!barId) alert('Missing barId in URL. Example: /checkin?barId=<uuid>');
@@ -150,12 +168,50 @@ export default function CheckinPage() {
           <Input placeholder="Beer name" value={beerName} onChange={(e)=>setBeerName(e.target.value)} />
           <Textarea placeholder="Describe taste, aroma, ambiance..." value={description} onChange={(e)=>setDescription(e.target.value)} />
           <div>
-            <div className="text-xs mb-1">Photos (max 6)</div>
-            <Input type="file" multiple accept="image/*" onChange={e=> setImages(Array.from(e.target.files||[]).slice(0,6))} />
-            {images.length > 0 && <div className="mt-2 grid grid-cols-3 gap-2">
-              {images.map((img,i)=> <div key={i} className="text-[10px] truncate border p-1 rounded-lg bg-stone-50">{img.name}</div> )}
-            </div>}
-            {uploadedPaths.length > 0 && <div className="mt-2 text-xs text-emerald-600">{uploadedPaths.length} uploaded.</div>}
+            <div className="text-xs mb-2 font-medium">Photos (max 6)</div>
+            <div className="space-y-3">
+              {/* Image previews */}
+              {imagePreviewUrls.length > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {imagePreviewUrls.map((url, i) => (
+                    <div key={i} className="relative">
+                      <img src={url} alt={`Preview ${i+1}`} className="w-full h-32 object-cover rounded-xl border" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                      >
+                        ×
+                      </button>
+                      <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                        {images[i]?.name?.slice(0, 15)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Add photos button */}
+              {images.length < 6 && (
+                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:border-stone-400 bg-stone-50">
+                  <div className="text-4xl text-stone-400">+</div>
+                  <div className="text-sm text-stone-600 mt-1">Add photos ({images.length}/6)</div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => addImages(e.target.files)}
+                  />
+                </label>
+              )}
+              
+              {uploadedPaths.length > 0 && (
+                <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded-xl">
+                  ✓ {uploadedPaths.length} photo{uploadedPaths.length !== 1 ? 's' : ''} uploaded successfully
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
