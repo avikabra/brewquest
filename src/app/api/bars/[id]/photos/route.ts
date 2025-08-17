@@ -43,7 +43,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       if (checkin.image_paths && checkin.image_paths.length > 0) {
         for (const imagePath of checkin.image_paths) {
           photos.push({
-            image_path: imagePath, // Fixed: was 'path', should be 'image_path'
+            image_path: imagePath,
             checkin_id: checkin.id,
             username: (checkin as any).profiles?.username || 'Anonymous', // Fixed: match expected field name
             uploaded_at: checkin.created_at
