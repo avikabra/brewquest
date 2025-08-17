@@ -5,9 +5,6 @@
 * AI recommendations at each bar based on community and previous beers (ie. if trying something new, drink this, else have one of these good options)
 * Suggestions for bars based on user inputs for what they like
 
-#### Social
-* Buddy feature -- join, like, community integration
-
 #### Functionality
 * Delete feature
 * Quick check in
