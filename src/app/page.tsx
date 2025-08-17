@@ -16,7 +16,7 @@ export default function Home() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [topBars, setTopBars] = useState<TopBar[]>([]);
   const [friendActivity, setFriendActivity] = useState<FriendActivityItem[]>([]);
-  const [token, setToken] = useState<string | null>(null);
+  const [_token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function Home() {
           .then(j=> setFriendActivity(j.items || []));
       }
     })();
-  }, []);
+  }, [router]);
 
   const Spark = ({ points }: { points: number[] }) => {
     const w = 160, h = 40, pad = 6;

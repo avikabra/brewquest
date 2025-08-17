@@ -17,7 +17,7 @@ export default function FriendsPage() {
   const [results, setResults] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState({ activity: false, friends: false, search: false, requests: false });
+  const [_loading, setLoading] = useState({ activity: false, friends: false, search: false, requests: false });
   const [myUserId, setMyUserId] = useState<string | null>(null);
 
   useEffect(() => { (async () => {
@@ -41,7 +41,7 @@ export default function FriendsPage() {
     const j = await res.json().catch(()=>({ items: [] }));
     setActivity(j.items || []); setLoading(l => ({ ...l, activity: false }));
   };
-  const loadRequests = async (t: string) => {
+  const loadRequests = async (_t: string) => {
     setLoading(l => ({ ...l, requests: true }));
     // naive: fetch friend edges and filter client-side
     const supa = supabaseBrowser();

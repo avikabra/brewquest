@@ -71,7 +71,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .slice(0, 3)
     .map(([key, score]) => ({ key: key.replace('_', ' '), score }));
     
-  const reviews = checkins
+  const _reviews = checkins
     .filter(c => c.ai_review || c.description)
     .slice(0, 5)
     .map(c => c.ai_review || c.description)

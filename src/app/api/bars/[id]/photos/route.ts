@@ -8,7 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const admin = supabaseAdmin();
     
     // First check if image_paths column exists
-    const { data: checkins, error } = await admin
+    const { data: _checkins, error } = await admin
       .from('checkins')
       .select('id, image_paths, created_at, profiles(username)')
       .eq('bar_id', id)

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type Row = {
   id: string;
@@ -55,7 +56,7 @@ export default function MePage() {
     try {
       const supabase = supabaseBrowser();
   await supabase.auth.signOut();
-    } catch (e) {
+    } catch (_e) {
       // ignore
     } finally {
       setSigningOut(false);
@@ -81,7 +82,7 @@ export default function MePage() {
             {r.image_paths && r.image_paths.length > 0 && (
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {r.image_paths.slice(0,6).map(p => (
-                  <img 
+                  <Image 
                     key={p} 
                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/checkin-images/${p}`} 
                     alt="checkin photo" 

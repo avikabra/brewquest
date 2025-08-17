@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { Star, Plus, X } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import Image from 'next/image';
 
 type Checkin = {
   id: string; created_at: string; user_id: string;
@@ -152,7 +152,7 @@ export default function CheckinDetailPage() {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {c.image_paths.map((path, i) => (
                   <div key={path} className="relative">
-                    <img
+                    <Image
                       src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/checkin-images/${path}`}
                       alt={`Photo ${i + 1}`}
                       className="w-full h-32 object-cover rounded-xl border"
@@ -175,7 +175,7 @@ export default function CheckinDetailPage() {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {newImages.map((file, i) => (
                   <div key={i} className="relative">
-                    <img
+                    <Image
                       src={URL.createObjectURL(file)}
                       alt={`New ${i + 1}`}
                       className="w-full h-32 object-cover rounded-xl border border-blue-200"

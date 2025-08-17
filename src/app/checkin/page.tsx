@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 const keys = ['taste','bitterness','aroma','smoothness','carbonation','temperature','music','lighting','crowd_vibe','cleanliness','decor'] as const;
@@ -175,7 +176,7 @@ export default function CheckinPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {imagePreviewUrls.map((url, i) => (
                     <div key={i} className="relative">
-                      <img src={url} alt={`Preview ${i+1}`} className="w-full h-32 object-cover rounded-xl border" />
+                      <Image src={url} alt={`Preview ${i+1}`} className="w-full h-32 object-cover rounded-xl border" />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}

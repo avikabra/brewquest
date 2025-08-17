@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { Star, Users, CalendarClock, Music, Lamp, Paintbrush, Sparkles, Camera, Zap, ThumbsUp, AlertTriangle, ThumbsDown } from 'lucide-react';
 import { Root as VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import Image from 'next/image';
 
 type Bar = { id: string; name: string; address?: string | null };
 type Agg = { checkin_count: number; avg_overall: number };
@@ -195,8 +196,8 @@ export default function BarSheet({ barId, open, onOpenChange }: { barId: string 
                 <div className="grid grid-cols-3 gap-2">
                   {photos.slice(0, 6).map((photo, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                      <img
-                        src={supabase?.storage.from('checkin-images').getPublicUrl(photo.image_path).data.publicUrl}
+                      <Image
+                        src={supabase?.storage.from('checkin-images').getPublicUrl(photo.image_path).data.publicUrl ?? ''}
                         alt={`Bar photo by ${photo.username}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
