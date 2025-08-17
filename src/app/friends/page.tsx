@@ -23,7 +23,9 @@ export default function FriendsPage() {
   useEffect(() => { (async () => {
     const supa = supabaseBrowser();
     const { data: { session } } = await supa.auth.getSession();
-  if (!session) return; setToken(session.access_token); setMyUserId(session.user.id);
+  if (!session) return;
+  setToken(session.access_token);
+  setMyUserId(session.user.id);
     loadFriends(session.access_token); loadActivity(session.access_token); loadRequests(session.access_token);
   })(); }, []);
 
