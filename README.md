@@ -9,7 +9,11 @@
 * Delete feature
 * Quick check in
 * Drop down for beers 
-* Image uploading on the user end 
+* Image uploading on the user end
+
+#### Additional Features
+* posthog analytics
+* social feature should be streamlined (ie. community page, barsheet) 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
